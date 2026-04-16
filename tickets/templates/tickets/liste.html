@@ -1,0 +1,6 @@
+<h1>Liste des Tickets de Support</h1>
+<ul>
+    {% for ticket in tickets %}
+        <li>{{ ticket.titre }} - <strong>{{ ticket.statut }}</strong> (Client: {{ ticket.client.nom }})</li>
+    {% endfor %}
+</ul>
