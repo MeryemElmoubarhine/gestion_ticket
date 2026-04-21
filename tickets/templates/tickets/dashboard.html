@@ -1,0 +1,103 @@
+{% extends 'tickets/base.html' %}
+{% block title %}Dashboard – EXPERTS ITN{% endblock %}
+
+{% block content %}
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg navbar-dark">
+  <div class="container-fluid px-4">
+    <span class="navbar-brand fw-bold">
+      <i class="fas fa-ticket-alt me-2"></i>EXPERTS ITN
+    </span>
+    <div class="ms-auto d-flex align-items-center gap-3">
+      <span class="text-white"><i class="fas fa-user-circle me-1"></i>{{ request.user.username }}</span>
+      <a href="{% url 'logout' %}" class="btn btn-outline-light btn-sm">
+        <i class="fas fa-sign-out-alt me-1"></i>Déconnexion
+      </a>
+    </div>
+  </div>
+</nav>
+
+<div class="container-fluid px-4 py-4">
+
+  <!-- TITRE -->
+  <h4 class="fw-bold text-dark mb-4">
+    <i class="fas fa-chart-pie me-2 text-primary"></i>Tableau de Bord
+  </h4>
+
+  <!-- CARTES STATISTIQUES -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-3">
+      <div class="card text-white h-100" style="background: linear-gradient(135deg,#1B4F8A,#2E5FA3);">
+        <div class="card-body d-flex justify-content-between align-items-center">
+          <div>
+            <div class="small opacity-75">Total Tickets</div>
+            <div class="fs-2 fw-bold">{{ total }}</div>
+          </div>
+          <i class="fas fa-ticket-alt fa-2x opacity-50"></i>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-white h-100" style="background: linear-gradient(135deg,#e67e22,#f39c12);">
+        <div class="card-body d-flex justify-content-between align-items-center">
+          <div>
+            <div class="small opacity-75">Ouverts</div>
+            <div class="fs-2 fw-bold">{{ ouverts }}</div>
+          </div>
+          <i class="fas fa-folder-open fa-2x opacity-50"></i>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-white h-100" style="background: linear-gradient(135deg,#27ae60,#2ecc71);">
+        <div class="card-body d-flex justify-content-between align-items-center">
+          <div>
+            <div class="small opacity-75">Résolus</div>
+            <div class="fs-2 fw-bold">{{ resolus }}</div>
+          </div>
+          <i class="fas fa-check-circle fa-2x opacity-50"></i>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-white h-100" style="background: linear-gradient(135deg,#c0392b,#e74c3c);">
+        <div class="card-body d-flex justify-content-between align-items-center">
+          <div>
+            <div class="small opacity-75">Urgents</div>
+            <div class="fs-2 fw-bold">{{ urgents }}</div>
+          </div>
+          <i class="fas fa-exclamation-triangle fa-2x opacity-50"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LIENS RAPIDES -->
+  <div class="row g-3">
+    <div class="col-md-6">
+      <div class="card h-100">
+        <div class="card-body">
+          <h6 class="fw-bold mb-3"><i class="fas fa-bolt me-2 text-warning"></i>Actions rapides</h6>
+          <a href="{% url 'liste_tickets' %}" class="btn btn-primary w-100 mb-2">
+            <i class="fas fa-list me-2"></i>Voir tous les tickets
+          </a>
+          <a href="#" class="btn btn-success w-100">
+            <i class="fas fa-plus me-2"></i>Créer un ticket
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card h-100">
+        <div class="card-body">
+          <h6 class="fw-bold mb-3"><i class="fas fa-info-circle me-2 text-info"></i>Informations</h6>
+          <p class="text-muted mb-1"><i class="fas fa-user me-2"></i>Connecté en tant que : <strong>{{ request.user.username }}</strong></p>
+          <p class="text-muted mb-1"><i class="fas fa-shield-alt me-2"></i>Rôle : <strong>{% if request.user.is_superuser %}Administrateur{% else %}Technicien{% endif %}</strong></p>
+          <p class="text-muted mb-0"><i class="fas fa-calendar me-2"></i>Application : <strong>Gestion Tickets IT v1.0</strong></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

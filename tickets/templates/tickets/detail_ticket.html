@@ -1,0 +1,87 @@
+{% extends 'tickets/base.html' %}
+{% block title %}Ticket #{{ ticket.id }} – EXPERTS ITN{% endblock %}
+{% block content %}
+<nav class="navbar navbar-expand-lg navbar-dark">
+  <div class="container-fluid px-4">
+    <span class="navbar-brand fw-bold"><i class="fas fa-ticket-alt me-2"></i>EXPERTS ITN</span>
+    <div class="ms-auto d-flex gap-3">
+      <a href="{% url 'liste_tickets' %}" class="btn btn-outline-light btn-sm">
+        <i class="fas fa-arrow-left me-1"></i>Retour
+      </a>
+      <a href="{% url 'logout' %}" class="btn btn-outline-light btn-sm">
+        <i class="fas fa-sign-out-alt"></i>
+      </a>
+    </div>
+  </div>
+</nav>
+<div class="container py-4">
+  <div class="row g-4">
+    <div class="col-md-8">
+      <div class="card mb-4">
+        <div class="card-header py-3" style="background:#1B4F8A;">
+          <h5 class="mb-0 text-white fw-bold">
+            <i class="fas fa-ticket-alt me-2"></i>Ticket #{{ ticket.id }} — {{ ticket.titre }}
+          </h5>
+        </div>
+        <div class="card-body p-4">
+          <p class="text-muted">{{ ticket.description }}</p>
+          <hr>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <small class="text-muted d-block">Client</small>
+              <strong>{{ ticket.client|default:"Non assigné" }}</strong>
+            </div>
+            <div class="col-md-6">
+              <small class="text-muted d-block">Technicien</small>
+              <strong>{{ ticket.technicien|default:"Non assigné" }}</strong>
+            </div>
+            <div class="col-md-6">
+              <small class="text-muted d-block">Statut</small>
+              {% if ticket.statut == 'OUVERT' %}<span class="badge bg-warning text-dark">Ouvert</span>
+              {% elif ticket.statut == 'EN_COURS' %}<span class="badge bg-primary">En cours</span>
+              {% elif ticket.statut == 'RESOLU' %}<span class="badge bg-success">Résolu</span>
+              {% elif ticket.statut == 'FERME' %}<span class="badge bg-secondary">Fermé</span>{% endif %}
+            </div>
+            <div class="col-md-6">
+              <small class="text-muted d-block">Priorité</small>
+              {% if ticket.priorite == 'HAUTE' %}<span class="badge bg-danger">Haute</span>
+              {% elif ticket.priorite == 'MOYENNE' %}<span class="badge bg-warning text-dark">Moyenne</span>
+              {% elif ticket.priorite == 'BASSE' %}<span class="badge bg-success">Basse</span>{% endif %}
+            </div>
+            <div class="col-md-6">
+              <small class="text-muted d-block">Date de création</small>
+              <strong>{{ ticket.date_creation|date:"d/m/Y H:i" }}</strong>
+            </div>
+          </div>
+          <div class="mt-4 d-flex gap-2">
+            <a href="{% url 'modifier_ticket' ticket.pk %}" class="btn btn-warning btn-sm">
+              <i class="fas fa-edit me-1"></i>Modifier
+            </a>
+            <a href="{% url 'supprimer_ticket' ticket.pk %}" class="btn btn-danger btn-sm">
+              <i class="fas fa-trash me-1"></i>Supprimer
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-header py-3 fw-bold" style="background:#1B4F8A; color:white;">
+          <i class="fas fa-history me-2"></i>Historique
+        </div>
+        <div class="card-body p-3">
+          {% for h in historique %}
+          <div class="border-start border-primary ps-3 mb-3">
+            <small class="text-muted">{{ h.date_action|date:"d/m/Y H:i" }}</small>
+            <div class="fw-semibold">{{ h.action }}</div>
+            <small class="text-muted">par {{ h.utilisateur }}</small>
+          </div>
+          {% empty %}
+          <p class="text-muted text-center">Aucun historique</p>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

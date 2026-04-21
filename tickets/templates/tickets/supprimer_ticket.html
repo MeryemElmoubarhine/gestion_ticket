@@ -1,0 +1,28 @@
+{% extends 'tickets/base.html' %}
+{% block title %}Supprimer Ticket{% endblock %}
+{% block content %}
+<nav class="navbar navbar-expand-lg navbar-dark">
+  <div class="container-fluid px-4">
+    <span class="navbar-brand fw-bold"><i class="fas fa-ticket-alt me-2"></i>EXPERTS ITN</span>
+  </div>
+</nav>
+<div class="container py-5" style="max-width:500px;">
+  <div class="card border-danger">
+    <div class="card-header bg-danger text-white py-3">
+      <h5 class="mb-0 fw-bold"><i class="fas fa-exclamation-triangle me-2"></i>Confirmer la suppression</h5>
+    </div>
+    <div class="card-body p-4 text-center">
+      <p class="fs-5">Voulez-vous vraiment supprimer le ticket :</p>
+      <p class="fw-bold fs-4 text-danger">« {{ ticket.titre }} »</p>
+      <p class="text-muted">Cette action est irréversible.</p>
+      <form method="POST" class="d-flex gap-3 justify-content-center mt-4">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger px-4">
+          <i class="fas fa-trash me-2"></i>Oui, supprimer
+        </button>
+        <a href="{% url 'liste_tickets' %}" class="btn btn-outline-secondary px-4">Annuler</a>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

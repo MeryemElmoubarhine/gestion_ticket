@@ -1,0 +1,70 @@
+{% extends 'tickets/base.html' %}
+{% block title %}Nouveau Ticket – EXPERTS ITN{% endblock %}
+{% block content %}
+<nav class="navbar navbar-expand-lg navbar-dark">
+  <div class="container-fluid px-4">
+    <span class="navbar-brand fw-bold"><i class="fas fa-ticket-alt me-2"></i>EXPERTS ITN</span>
+    <div class="ms-auto d-flex gap-3">
+      <a href="{% url 'liste_tickets' %}" class="btn btn-outline-light btn-sm">
+        <i class="fas fa-arrow-left me-1"></i>Retour
+      </a>
+      <a href="{% url 'logout' %}" class="btn btn-outline-light btn-sm">
+        <i class="fas fa-sign-out-alt me-1"></i>Déconnexion
+      </a>
+    </div>
+  </div>
+</nav>
+<div class="container py-4" style="max-width:700px;">
+  <div class="card">
+    <div class="card-header py-3" style="background:#1B4F8A;">
+      <h5 class="mb-0 text-white fw-bold">
+        <i class="fas fa-plus-circle me-2"></i>Créer un nouveau ticket
+      </h5>
+    </div>
+    <div class="card-body p-4">
+      {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+      <form method="POST">
+        {% csrf_token %}
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Titre <span class="text-danger">*</span></label>
+          {{ form.titre }}
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Description <span class="text-danger">*</span></label>
+          {{ form.description }}
+        </div>
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Client</label>
+            {{ form.client }}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Technicien</label>
+            {{ form.technicien }}
+          </div>
+        </div>
+        <div class="row g-3 mb-4">
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Priorité</label>
+            {{ form.priorite }}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Statut</label>
+            {{ form.statut }}
+          </div>
+        </div>
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-success px-4">
+            <i class="fas fa-save me-2"></i>Créer le ticket
+          </button>
+          <a href="{% url 'liste_tickets' %}" class="btn btn-outline-secondary px-4">Annuler</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
