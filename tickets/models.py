@@ -1,5 +1,7 @@
 from django.contrib.auth.models import User
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 class Client(models.Model):
     nom = models.CharField(max_length=100)
@@ -38,3 +40,23 @@ class Historique(models.Model):
     utilisateur = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     action = models.TextField()
     date_action = models.DateTimeField(auto_now_add=True)
+
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+class Profil(models.Model):
+    ROLE_CHOICES = [
+        ('admin', 'Administrateur'),
+        ('technicien', 'Technicien'),
+        ('utilisateur', 'Utilisateur'),
+    ]
+    utilisateur = models.OneToOneField(User, on_delete=models.CASCADE)
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='utilisateur')
+
+    def __str__(self):
+        return f"{self.utilisateur.username} – {self.role}"
+
+@receiver(post_save, sender=User)
+def creer_profil(sender, instance, created, **kwargs):
+    if created:
+        Profil.objects.create(utilisateur=instance)
