@@ -1,0 +1,102 @@
+{% extends 'tickets/base.html' %}
+{% block title %}Dashboard – EXPERTS ITN{% endblock %}
+{% block content %}
+<nav class="navbar navbar-expand-lg navbar-dark">
+  <div class="container-fluid px-4">
+    <span class="navbar-brand fw-bold"><i class="fas fa-ticket-alt me-2"></i>EXPERTS ITN</span>
+    <div class="ms-auto d-flex align-items-center gap-2">
+      <span class="badge bg-success">Utilisateur</span>
+      <span class="text-white"><i class="fas fa-user-circle me-1"></i>{{ request.user.username }}</span>
+      <a href="{% url 'logout' %}" class="btn btn-outline-light btn-sm"><i class="fas fa-sign-out-alt"></i></a>
+    </div>
+  </div>
+</nav>
+
+<div class="container-fluid px-4 py-4">
+  <h4 class="fw-bold mb-4">
+    <i class="fas fa-home me-2 text-success"></i>
+    Bonjour {{ request.user.first_name|default:request.user.username }} 👋
+  </h4>
+
+  <!-- STATS -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-4">
+      <div class="card text-white text-center" style="background:linear-gradient(135deg,#1B4F8A,#2E5FA3);">
+        <div class="card-body py-3">
+          <div class="fs-2 fw-bold">{{ total }}</div>
+          <div class="small">Total Tickets</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card text-white text-center" style="background:linear-gradient(135deg,#e67e22,#f39c12);">
+        <div class="card-body py-3">
+          <div class="fs-2 fw-bold">{{ ouverts }}</div>
+          <div class="small">Tickets Ouverts</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card text-white text-center" style="background:linear-gradient(135deg,#27ae60,#2ecc71);">
+        <div class="card-body py-3">
+          <div class="fs-2 fw-bold">{{ resolus }}</div>
+          <div class="small">Tickets Résolus</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DERNIERS TICKETS -->
+  <div class="card">
+    <div class="card-header fw-bold" style="background:#1B4F8A;color:white;">
+      <i class="fas fa-clock me-2"></i>Derniers Tickets
+    </div>
+    <div class="card-body p-0">
+      <table class="table table-hover mb-0">
+        <thead style="background:#f8f9fa;">
+          <tr>
+            <th class="px-3">#</th>
+            <th>Titre</th>
+            <th>Statut</th>
+            <th>Priorité</th>
+            <th>Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for ticket in derniers_tickets %}
+          <tr>
+            <td class="px-3">{{ ticket.id }}</td>
+            <td>{{ ticket.titre }}</td>
+            <td>
+              {% if ticket.statut == 'OUVERT' %}<span class="badge bg-warning text-dark">Ouvert</span>
+              {% elif ticket.statut == 'EN_COURS' %}<span class="badge bg-primary">En cours</span>
+              {% elif ticket.statut == 'RESOLU' %}<span class="badge bg-success">Résolu</span>
+              {% elif ticket.statut == 'FERME' %}<span class="badge bg-secondary">Fermé</span>{% endif %}
+            </td>
+            <td>
+              {% if ticket.priorite == 'HAUTE' %}<span class="badge bg-danger">Haute</span>
+              {% elif ticket.priorite == 'MOYENNE' %}<span class="badge bg-warning text-dark">Moyenne</span>
+              {% elif ticket.priorite == 'BASSE' %}<span class="badge bg-success">Basse</span>{% endif %}
+            </td>
+            <td class="text-muted">{{ ticket.date_creation|date:"d/m/Y" }}</td>
+            <td>
+              <a href="{% url 'detail_ticket' ticket.pk %}" class="btn btn-sm btn-outline-primary">
+                <i class="fas fa-eye"></i>
+              </a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="6" class="text-center py-4 text-muted">Aucun ticket</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="card-footer">
+      <a href="{% url 'liste_tickets' %}" class="btn btn-outline-primary btn-sm">
+        <i class="fas fa-list me-1"></i>Voir tous les tickets
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -132,5 +132,10 @@ CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'Africa/Casablanca'
 
 # Email Configuration (console pour les tests)
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-DEFAULT_FROM_EMAIL = 'noreply@experts-itn.com'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'elmoubarhinemrym@gmail.com'
+EMAIL_HOST_PASSWORD = 'ylwzidjzvahxdxjo'
+DEFAULT_FROM_EMAIL = 'elmoubarhinemrym@gmail.com'
