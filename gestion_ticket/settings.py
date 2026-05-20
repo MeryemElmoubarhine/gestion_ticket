@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-0lgnerq8$e35y@9u(t_ks1)=@e3v*k=g^21jhtn(np#)7$d!06
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['192.168.74.128', 'localhost', '127.0.0.1']
 
 
 # Application definition
@@ -121,7 +121,8 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATIC_ROOT = '/home/meryem/gestion_ticket/staticfiles/'
 
 # Celery Configuration
 CELERY_BROKER_URL = 'redis://localhost:6379/0'
