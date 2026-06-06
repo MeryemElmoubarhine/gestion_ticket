@@ -45,73 +45,68 @@ def dashboard(request):
 # ── DASHBOARD ADMIN ──────────────────────────────────────
 @login_required(login_url='login')
 def dashboard_admin(request):
-    role = get_role(request.user)
-    if role != 'admin' and not request.user.is_superuser:
-        return redirect('dashboard')
-
-    total    = Ticket.objects.count()
-    ouverts  = Ticket.objects.filter(statut='OUVERT').count()
-    resolus  = Ticket.objects.filter(statut='RESOLU').count()
-    en_cours = Ticket.objects.filter(statut='EN_COURS').count()
-    fermes   = Ticket.objects.filter(statut='FERME').count()
-    haute    = Ticket.objects.filter(priorite='HAUTE').count()
-    moyenne  = Ticket.objects.filter(priorite='MOYENNE').count()
-    basse    = Ticket.objects.filter(priorite='BASSE').count()
-    techniciens = User.objects.filter(profil__role='technicien')
-    utilisateurs = User.objects.filter(profil__role='utilisateur')
-    derniers_tickets = Ticket.objects.all().order_by('-date_creation')[:5]
+    tickets = Ticket.objects.all()
+    total = tickets.count()
+    ouverts = tickets.filter(statut='OUVERT').count()
+    en_cours = tickets.filter(statut='EN_COURS').count()
+    resolus = tickets.filter(statut='RESOLU').count()
+    fermes = tickets.filter(statut='FERME').count()
+    haute = tickets.filter(priorite='HAUTE').count()
+    moyenne = tickets.filter(priorite='MOYENNE').count()
+    basse = tickets.filter(priorite='BASSE').count()
+    nb_techniciens = User.objects.filter(profil__role='technicien').count()
+    nb_utilisateurs = User.objects.filter(profil__role='utilisateur').count()
+    derniers_tickets = tickets.order_by('-date_creation')[:5]
 
     return render(request, 'tickets/dashboard_admin.html', {
-        'total': total, 'ouverts': ouverts, 'resolus': resolus,
-        'en_cours': en_cours, 'fermes': fermes,
-        'haute': haute, 'moyenne': moyenne, 'basse': basse,
-        'techniciens': techniciens, 'utilisateurs': utilisateurs,
+        'total': total,
+        'ouverts': ouverts,
+        'en_cours': en_cours,
+        'resolus': resolus,
+        'fermes': fermes,
+        'haute': haute,
+        'moyenne': moyenne,
+        'basse': basse,
+        'nb_techniciens': nb_techniciens,
+        'nb_utilisateurs': nb_utilisateurs,
         'derniers_tickets': derniers_tickets,
-        'nb_techniciens': techniciens.count(),
-        'nb_utilisateurs': utilisateurs.count(),
     })
 
-# ── DASHBOARD TECHNICIEN ─────────────────────────────────
+# ── DASHBOARD TECHNICIEN ────────────────────────────────
 @login_required(login_url='login')
 def dashboard_technicien(request):
-    role = get_role(request.user)
-    if role != 'technicien':
-        return redirect('dashboard')
-
-    mes_tickets = Ticket.objects.filter(technicien=request.user)
-    total       = mes_tickets.count()
-    ouverts     = mes_tickets.filter(statut='OUVERT').count()
-    en_cours    = mes_tickets.filter(statut='EN_COURS').count()
-    resolus     = mes_tickets.filter(statut='RESOLU').count()
-    fermes      = mes_tickets.filter(statut='FERME').count()
-    haute       = mes_tickets.filter(priorite='HAUTE').count()
-    derniers    = mes_tickets.order_by('-date_creation')[:5]
+    tickets = Ticket.objects.filter(technicien=request.user)
+    mes_ouverts = tickets.filter(statut='OUVERT').count()
+    mes_en_cours = tickets.filter(statut='EN_COURS').count()
+    mes_resolus = tickets.filter(statut='RESOLU').count()
+    mes_fermes = tickets.filter(statut='FERME').count()
+    urgents = tickets.filter(priorite='HAUTE').count()
+    a_traiter = tickets.filter(statut='OUVERT').count()
+    derniers_tickets = tickets.order_by('-date_creation')[:5]
 
     return render(request, 'tickets/dashboard_technicien.html', {
-        'total': total, 'ouverts': ouverts,
-        'en_cours': en_cours, 'resolus': resolus,
-        'fermes': fermes, 'haute': haute,
-        'derniers_tickets': derniers,
+        'mes_tickets': tickets.count(),
+        'a_traiter': a_traiter,
+        'mes_en_cours': mes_en_cours,
+        'urgents': urgents,
+        'mes_ouverts': mes_ouverts,
+        'mes_resolus': mes_resolus,
+        'mes_fermes': mes_fermes,
+        'derniers_tickets': derniers_tickets,
     })
 
 # ── DASHBOARD UTILISATEUR ────────────────────────────────
 @login_required(login_url='login')
 def dashboard_utilisateur(request):
-    role = get_role(request.user)
-    if role != 'utilisateur':
-        return redirect('dashboard')
-
-    tous_tickets = Ticket.objects.all()
-    total    = tous_tickets.count()
-    ouverts  = tous_tickets.filter(statut='OUVERT').count()
-    resolus  = tous_tickets.filter(statut='RESOLU').count()
-    en_cours = tous_tickets.filter(statut='EN_COURS').count()
-    derniers = tous_tickets.order_by('-date_creation')[:5]
-
+    derniers_tickets = Ticket.objects.filter(client=request.user).order_by('-date_creation')
+    total = derniers_tickets.count()
+    ouverts = derniers_tickets.filter(statut='OUVERT').count()
+    resolus = derniers_tickets.filter(statut='RESOLU').count()
     return render(request, 'tickets/dashboard_utilisateur.html', {
-        'total': total, 'ouverts': ouverts,
-        'resolus': resolus, 'en_cours': en_cours,
-        'derniers_tickets': derniers,
+        'derniers_tickets': derniers_tickets,
+        'total': total,
+        'ouverts': ouverts,
+        'resolus': resolus,
     })
 
 # ── GESTION UTILISATEURS (admin seulement) ───────────────
@@ -144,6 +139,8 @@ def liste_tickets(request):
     role = get_role(request.user)
     if role == 'technicien':
         tickets = Ticket.objects.filter(technicien=request.user).order_by('-date_creation')
+    elif role == 'utilisateur':
+        tickets = Ticket.objects.filter(client=request.user).order_by('-date_creation')
     else:
         tickets = Ticket.objects.all().order_by('-date_creation')
     return render(request, 'tickets/liste.html', {'tickets': tickets, 'role': role})
@@ -262,3 +259,7 @@ def api_stats(request):
         'moyenne': Ticket.objects.filter(priorite='MOYENNE').count(),
         'basse': Ticket.objects.filter(priorite='BASSE').count(),
     })
+
+#-----Page d'accueil-------
+def accueil(request):
+    return render(request, 'tickets/accueil.html')

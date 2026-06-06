@@ -1,0 +1,1098 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EXPERTS ITN — Gestion des Tickets IT</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --green: #6B8E23;
+    --green-dark: #4a6318;
+    --green-light: #8ab52d;
+    --navy: #0f1923;
+    --navy-light: #1a2d3d;
+    --white: #ffffff;
+    --gray-light: #f4f5f0;
+    --gray-mid: #e8ebe0;
+    --text-muted: #8a9178;
+    --accent: #c8e43a;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--navy);
+    color: var(--white);
+    overflow-x: hidden;
+  }
+
+  /* ─── NAVBAR ─────────────────────────── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.2rem 4rem;
+    background: rgba(15, 25, 35, 0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(107, 142, 35, 0.2);
+  }
+
+  .nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .logo-mark {
+    width: 36px; height: 36px;
+    background: var(--green);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 14px;
+    color: white;
+    letter-spacing: -0.5px;
+  }
+
+  .logo-text {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: white;
+    letter-spacing: 0.5px;
+  }
+
+  .logo-text span { color: var(--green-light); }
+
+  .nav-links {
+    display: flex;
+    gap: 2.5rem;
+    list-style: none;
+  }
+
+  .nav-links a {
+    text-decoration: none;
+    color: rgba(255,255,255,0.65);
+    font-size: 0.9rem;
+    font-weight: 400;
+    transition: color 0.2s;
+    letter-spacing: 0.3px;
+  }
+
+  .nav-links a:hover { color: var(--accent); }
+
+  .nav-cta {
+    background: var(--green);
+    color: white !important;
+    padding: 0.55rem 1.4rem;
+    border-radius: 6px;
+    font-weight: 500 !important;
+    transition: background 0.2s !important;
+  }
+
+  .nav-cta:hover { background: var(--green-light) !important; color: white !important; }
+
+  /* ─── HERO ───────────────────────────── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    position: relative;
+    padding: 8rem 4rem 4rem;
+    overflow: hidden;
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 70% 50%, rgba(107,142,35,0.12) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 40% at 10% 80%, rgba(107,142,35,0.08) 0%, transparent 60%);
+  }
+
+  .hero-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(107,142,35,0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(107,142,35,0.06) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: radial-gradient(ellipse at center, black 30%, transparent 70%);
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 1;
+    max-width: 680px;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(107,142,35,0.15);
+    border: 1px solid rgba(107,142,35,0.4);
+    color: var(--accent);
+    padding: 0.4rem 1rem;
+    border-radius: 100px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    margin-bottom: 2rem;
+    animation: fadeIn 0.6s ease both;
+  }
+
+  .badge-dot {
+    width: 7px; height: 7px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2.8rem, 5vw, 4.2rem);
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 1.5rem;
+    animation: slideUp 0.7s ease 0.1s both;
+  }
+
+  h1 .highlight {
+    color: var(--accent);
+    position: relative;
+    display: inline-block;
+  }
+
+  h1 .highlight::after {
+    content: '';
+    position: absolute;
+    bottom: 2px; left: 0; right: 0;
+    height: 3px;
+    background: var(--green);
+    border-radius: 2px;
+    transform: scaleX(0);
+    transform-origin: left;
+    animation: underline 0.5s ease 0.8s forwards;
+  }
+
+  @keyframes underline { to { transform: scaleX(1); } }
+
+  .hero-desc {
+    font-size: 1.1rem;
+    color: rgba(255,255,255,0.6);
+    line-height: 1.7;
+    margin-bottom: 2.5rem;
+    max-width: 560px;
+    font-weight: 300;
+    animation: slideUp 0.7s ease 0.2s both;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    animation: slideUp 0.7s ease 0.3s both;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--green);
+    color: white;
+    padding: 0.85rem 2rem;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 0.95rem;
+    text-decoration: none;
+    transition: all 0.2s;
+    border: none;
+    cursor: pointer;
+  }
+
+  .btn-primary:hover {
+    background: var(--green-light);
+    transform: translateY(-2px);
+  }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: transparent;
+    color: rgba(255,255,255,0.75);
+    padding: 0.85rem 2rem;
+    border-radius: 8px;
+    font-weight: 400;
+    font-size: 0.95rem;
+    text-decoration: none;
+    border: 1px solid rgba(255,255,255,0.2);
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+
+  .btn-secondary:hover {
+    border-color: rgba(255,255,255,0.5);
+    color: white;
+    transform: translateY(-2px);
+  }
+
+  .hero-stats {
+    position: relative;
+    z-index: 1;
+    margin-top: 4rem;
+    display: flex;
+    gap: 3rem;
+    animation: slideUp 0.7s ease 0.4s both;
+  }
+
+  .stat-item { text-align: center; }
+
+  .stat-number {
+    font-family: 'Syne', sans-serif;
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--accent);
+    display: block;
+  }
+
+  .stat-label {
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.45);
+    letter-spacing: 0.5px;
+    margin-top: 2px;
+  }
+
+  .stat-divider {
+    width: 1px;
+    background: rgba(255,255,255,0.1);
+  }
+
+  /* Dashboard mockup */
+  .hero-visual {
+    position: absolute;
+    right: -30px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 540px;
+    animation: slideLeft 0.9s ease 0.2s both;
+  }
+
+  @keyframes slideLeft {
+    from { opacity: 0; transform: translateY(-50%) translateX(60px); }
+    to { opacity: 1; transform: translateY(-50%) translateX(0); }
+  }
+
+  .mockup-window {
+    background: rgba(26, 45, 61, 0.9);
+    border: 1px solid rgba(107,142,35,0.3);
+    border-radius: 16px;
+    overflow: hidden;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 40px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(107,142,35,0.2);
+  }
+
+  .mockup-titlebar {
+    background: rgba(15,25,35,0.8);
+    padding: 0.7rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border-bottom: 1px solid rgba(107,142,35,0.15);
+  }
+
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot-red { background: #ff5f56; }
+  .dot-yellow { background: #ffbd2e; }
+  .dot-green { background: #27c93f; }
+
+  .mockup-titlebar span {
+    margin-left: 10px;
+    font-size: 0.78rem;
+    color: rgba(255,255,255,0.3);
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .mockup-body { padding: 1.2rem; }
+
+  .mock-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+
+  .mock-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: white;
+  }
+
+  .mock-badge-admin {
+    background: rgba(200, 228, 58, 0.15);
+    color: var(--accent);
+    padding: 3px 10px;
+    border-radius: 100px;
+    font-size: 0.7rem;
+    font-weight: 500;
+    border: 1px solid rgba(200,228,58,0.3);
+  }
+
+  .mock-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 1rem;
+  }
+
+  .mock-stat {
+    background: rgba(107,142,35,0.1);
+    border: 1px solid rgba(107,142,35,0.2);
+    border-radius: 10px;
+    padding: 0.7rem;
+    text-align: center;
+  }
+
+  .mock-stat-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--accent);
+    display: block;
+  }
+
+  .mock-stat-lbl {
+    font-size: 0.65rem;
+    color: rgba(255,255,255,0.4);
+    margin-top: 2px;
+  }
+
+  .mock-tickets { display: flex; flex-direction: column; gap: 6px; }
+
+  .mock-ticket {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px;
+    padding: 0.55rem 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .mock-ticket-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .dot-ouvert { background: #f59e0b; }
+  .dot-encours { background: #3b82f6; }
+  .dot-resolu { background: #10b981; }
+  .dot-ferme { background: #6b7280; }
+
+  .mock-ticket-title {
+    font-size: 0.75rem;
+    color: rgba(255,255,255,0.8);
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .mock-ticket-tag {
+    font-size: 0.62rem;
+    padding: 2px 7px;
+    border-radius: 100px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .tag-haute { background: rgba(239,68,68,0.15); color: #f87171; }
+  .tag-moyenne { background: rgba(245,158,11,0.15); color: #fbbf24; }
+  .tag-basse { background: rgba(16,185,129,0.15); color: #34d399; }
+
+  /* ─── FEATURES ───────────────────────── */
+  .section {
+    padding: 6rem 4rem;
+  }
+
+  .section-label {
+    display: inline-block;
+    font-size: 0.75rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--green-light);
+    font-weight: 500;
+    margin-bottom: 1rem;
+  }
+
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2rem, 3.5vw, 2.8rem);
+    font-weight: 800;
+    line-height: 1.15;
+    margin-bottom: 1rem;
+  }
+
+  .section-subtitle {
+    font-size: 1rem;
+    color: rgba(255,255,255,0.5);
+    line-height: 1.7;
+    max-width: 520px;
+    font-weight: 300;
+    margin-bottom: 3rem;
+  }
+
+  /* Features grid */
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5px;
+    background: rgba(107,142,35,0.15);
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid rgba(107,142,35,0.2);
+  }
+
+  .feature-card {
+    background: var(--navy);
+    padding: 2rem;
+    transition: background 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .feature-card:hover {
+    background: rgba(26, 45, 61, 0.9);
+  }
+
+  .feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--green);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s;
+  }
+
+  .feature-card:hover::before { transform: scaleX(1); }
+
+  .feature-icon {
+    width: 44px; height: 44px;
+    background: rgba(107,142,35,0.12);
+    border: 1px solid rgba(107,142,35,0.25);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .feature-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: white;
+  }
+
+  .feature-desc {
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.5);
+    line-height: 1.6;
+    font-weight: 300;
+  }
+
+  /* ─── ROLES ──────────────────────────── */
+  .roles-section {
+    background: rgba(107,142,35,0.05);
+    border-top: 1px solid rgba(107,142,35,0.15);
+    border-bottom: 1px solid rgba(107,142,35,0.15);
+  }
+
+  .roles-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+
+  .role-card {
+    background: rgba(26, 45, 61, 0.6);
+    border: 1px solid rgba(107,142,35,0.2);
+    border-radius: 16px;
+    padding: 2rem;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .role-card:hover {
+    border-color: rgba(107,142,35,0.5);
+    transform: translateY(-4px);
+  }
+
+  .role-icon-wrap {
+    width: 56px; height: 56px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .role-admin { background: rgba(200,228,58,0.12); }
+  .role-tech { background: rgba(59,130,246,0.12); }
+  .role-user { background: rgba(245,158,11,0.12); }
+
+  .role-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+  }
+
+  .role-subtitle {
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.4);
+    margin-bottom: 1.2rem;
+  }
+
+  .role-perms { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+
+  .role-perm {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.82rem;
+    color: rgba(255,255,255,0.65);
+  }
+
+  .perm-check { color: var(--green-light); font-size: 0.85rem; }
+  .perm-cross { color: rgba(255,255,255,0.25); font-size: 0.85rem; }
+
+  /* ─── STACK ──────────────────────────── */
+  .stack-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+  }
+
+  .stack-item {
+    background: rgba(26,45,61,0.6);
+    border: 1px solid rgba(107,142,35,0.15);
+    border-radius: 12px;
+    padding: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.2s;
+  }
+
+  .stack-item:hover {
+    border-color: rgba(107,142,35,0.4);
+    background: rgba(26,45,61,0.9);
+  }
+
+  .stack-logo {
+    width: 40px; height: 40px;
+    border-radius: 8px;
+    background: rgba(107,142,35,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    font-weight: 800;
+    font-family: 'Syne', sans-serif;
+    flex-shrink: 0;
+  }
+
+  .stack-name {
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: white;
+  }
+
+  .stack-type {
+    font-size: 0.72rem;
+    color: rgba(255,255,255,0.35);
+    margin-top: 1px;
+  }
+
+  /* ─── CTA ────────────────────────────── */
+  .cta-section {
+    text-align: center;
+    padding: 6rem 4rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cta-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 60% 70% at 50% 50%, rgba(107,142,35,0.1) 0%, transparent 70%);
+  }
+
+  .cta-content { position: relative; z-index: 1; }
+
+  .cta-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    font-weight: 800;
+    margin-bottom: 1rem;
+  }
+
+  .cta-desc {
+    color: rgba(255,255,255,0.5);
+    font-size: 1rem;
+    margin-bottom: 2.5rem;
+    font-weight: 300;
+  }
+
+  /* ─── FOOTER ─────────────────────────── */
+  footer {
+    border-top: 1px solid rgba(107,142,35,0.15);
+    padding: 2rem 4rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .footer-left {
+    font-size: 0.82rem;
+    color: rgba(255,255,255,0.3);
+  }
+
+  .footer-right {
+    display: flex;
+    gap: 1.5rem;
+  }
+
+  .footer-link {
+    font-size: 0.82rem;
+    color: rgba(255,255,255,0.3);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .footer-link:hover { color: var(--green-light); }
+
+  /* ─── ANIMATIONS ─────────────────────── */
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav>
+  <div class="nav-logo">
+    <div class="logo-mark">EI</div>
+    <div class="logo-text">EXPERTS <span>ITN</span></div>
+  </div>
+  <ul class="nav-links">
+    <li><a href="#features">Fonctionnalités</a></li>
+    <li><a href="#roles">Rôles</a></li>
+    <li><a href="#stack">Technologies</a></li>
+    <li><a href="{% url 'login' %}" class="nav-cta">Se connecter →</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+
+  <div class="hero-content">
+    <div class="hero-badge">
+      <div class="badge-dot"></div>
+      Projet PFE — Meryem Elmoubarhine
+    </div>
+
+    <h1>
+      Gestion des<br>
+      <span class="highlight">Tickets IT</span><br>
+      centralisée
+    </h1>
+
+    <p class="hero-desc">
+      Application web professionnelle de suivi et résolution des incidents IT. 
+      Trois niveaux d'accès, notifications automatiques, et déploiement en production sur AlmaLinux.
+    </p>
+
+    <div class="hero-actions">
+      <a href="http://192.168.74.128" class="btn-primary">
+        Accéder à l'application →
+      </a>
+      <a href="https://github.com/MeryemElmoubarhine/gestion_ticket" class="btn-secondary">
+        Voir sur GitHub
+      </a>
+    </div>
+
+    <div class="hero-stats">
+      <div class="stat-item">
+        <span class="stat-number">6</span>
+        <div class="stat-label">ENDPOINTS API</div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <span class="stat-number">3</span>
+        <div class="stat-label">RÔLES</div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <span class="stat-number">8</span>
+        <div class="stat-label">SEMAINES</div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <span class="stat-number">100%</span>
+        <div class="stat-label">DÉPLOYÉ</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dashboard mockup -->
+  <div class="hero-visual">
+    <div class="mockup-window">
+      <div class="mockup-titlebar">
+        <div class="dot dot-red"></div>
+        <div class="dot dot-yellow"></div>
+        <div class="dot dot-green"></div>
+        <span>http://192.168.74.128/dashboard/admin/</span>
+      </div>
+      <div class="mockup-body">
+        <div class="mock-header">
+          <div class="mock-title">🛡️ Dashboard Administrateur</div>
+          <div class="mock-badge-admin">Admin</div>
+        </div>
+        <div class="mock-stats">
+          <div class="mock-stat">
+            <span class="mock-stat-num">6</span>
+            <div class="mock-stat-lbl">Total Tickets</div>
+          </div>
+          <div class="mock-stat">
+            <span class="mock-stat-num">3</span>
+            <div class="mock-stat-lbl">En cours</div>
+          </div>
+          <div class="mock-stat">
+            <span class="mock-stat-num">1</span>
+            <div class="mock-stat-lbl">Résolus</div>
+          </div>
+        </div>
+        <div class="mock-tickets">
+          <div class="mock-ticket">
+            <div class="mock-ticket-dot dot-ouvert"></div>
+            <div class="mock-ticket-title">ticket7 — Problème réseau</div>
+            <div class="mock-ticket-tag tag-haute">Haute</div>
+          </div>
+          <div class="mock-ticket">
+            <div class="mock-ticket-dot dot-encours"></div>
+            <div class="mock-ticket-title">ticket6 — Accès VPN</div>
+            <div class="mock-ticket-tag tag-basse">Basse</div>
+          </div>
+          <div class="mock-ticket">
+            <div class="mock-ticket-dot dot-encours"></div>
+            <div class="mock-ticket-title">ticket5 — Mise à jour serveur</div>
+            <div class="mock-ticket-tag tag-haute">Haute</div>
+          </div>
+          <div class="mock-ticket">
+            <div class="mock-ticket-dot dot-resolu"></div>
+            <div class="mock-ticket-title">ticket4 — Installation logiciel</div>
+            <div class="mock-ticket-tag tag-moyenne">Moyenne</div>
+          </div>
+          <div class="mock-ticket">
+            <div class="mock-ticket-dot dot-ferme"></div>
+            <div class="mock-ticket-title">ticket3 — Sauvegarde données</div>
+            <div class="mock-ticket-tag tag-haute">Haute</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="section" id="features">
+  <div class="reveal">
+    <div class="section-label">Fonctionnalités</div>
+    <h2 class="section-title">Tout ce dont vous avez besoin<br>pour gérer vos incidents IT</h2>
+    <p class="section-subtitle">Une solution complète de bout en bout, du ticket à la résolution, avec traçabilité et notifications automatiques.</p>
+  </div>
+
+  <div class="features-grid reveal">
+    <div class="feature-card">
+      <div class="feature-icon">🔐</div>
+      <div class="feature-title">Authentification sécurisée</div>
+      <div class="feature-desc">Login/logout avec protection CSRF, sessions sécurisées et redirection automatique selon le rôle de l'utilisateur.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🎫</div>
+      <div class="feature-title">CRUD Tickets complet</div>
+      <div class="feature-desc">Création, lecture, modification et suppression des tickets avec titre, description, priorité, statut et assignation technicien.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📊</div>
+      <div class="feature-title">Dashboard interactif</div>
+      <div class="feature-desc">Trois dashboards personnalisés avec graphiques Canvas HTML5 (donut statuts, barres priorités) sans dépendance externe.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📧</div>
+      <div class="feature-title">Emails automatiques</div>
+      <div class="feature-desc">Notification par email à la création d'un ticket et lors de l'assignation via Gmail SMTP, traitement asynchrone avec Celery.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🔌</div>
+      <div class="feature-title">API REST</div>
+      <div class="feature-desc">6 endpoints RESTful avec Django REST Framework pour liste, détail, création, modification, suppression et statistiques JSON.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📋</div>
+      <div class="feature-title">Historique des actions</div>
+      <div class="feature-desc">Traçabilité complète de chaque action sur un ticket (création, modification) avec horodatage et utilisateur responsable.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">⚡</div>
+      <div class="feature-title">Fermeture automatique</div>
+      <div class="feature-desc">Les tickets résolus inactifs depuis 7 jours sont fermés automatiquement par une tâche Celery planifiée.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🚀</div>
+      <div class="feature-title">Déploiement production</div>
+      <div class="feature-desc">Gunicorn + Nginx sur AlmaLinux avec services systemd pour démarrage automatique. Accessible sur http://192.168.74.128.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🛡️</div>
+      <div class="feature-title">Sécurité renforcée</div>
+      <div class="feature-desc">Credentials dans .env non versionné, .gitignore configuré, CSRF protégé, permissions vérifiées à chaque action.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ROLES -->
+<section class="section roles-section" id="roles">
+  <div class="reveal">
+    <div class="section-label">Rôles & Permissions</div>
+    <h2 class="section-title">Trois niveaux d'accès<br>bien définis</h2>
+    <p class="section-subtitle">Chaque acteur dispose de permissions précises adaptées à ses responsabilités.</p>
+  </div>
+
+  <div class="roles-grid reveal">
+    <div class="role-card">
+      <div class="role-icon-wrap role-admin" style="font-size:1.6rem">🛡️</div>
+      <div class="role-name">Administrateur</div>
+      <div class="role-subtitle">Accès complet au système</div>
+      <ul class="role-perms">
+        <li class="role-perm"><span class="perm-check">✓</span> Voir tous les tickets</li>
+        <li class="role-perm"><span class="perm-check">✓</span> Créer des tickets</li>
+        <li class="role-perm"><span class="perm-check">✓</span> Modifier les tickets</li>
+        <li class="role-perm"><span class="perm-check">✓</span> Supprimer les tickets</li>
+        <li class="role-perm"><span class="perm-check">✓</span> Gérer les utilisateurs</li>
+        <li class="role-perm"><span class="perm-check">✓</span> Statistiques globales</li>
+        <li class="role-perm"><span class="perm-check">✓</span> Accès API REST</li>
+      </ul>
+    </div>
+
+    <div class="role-card">
+      <div class="role-icon-wrap role-tech" style="font-size:1.6rem">🔧</div>
+      <div class="role-name">Technicien</div>
+      <div class="role-subtitle">Gestion de ses tickets assignés</div>
+      <ul class="role-perms">
+        <li class="role-perm"><span class="perm-check">✓</span> Voir ses tickets assignés</li>
+        <li class="role-perm"><span class="perm-check">✓</span> Créer des tickets</li>
+        <li class="role-perm"><span class="perm-check">✓</span> Modifier ses tickets</li>
+        <li class="role-perm"><span class="perm-cross">✗</span> Supprimer les tickets</li>
+        <li class="role-perm"><span class="perm-cross">✗</span> Gérer les utilisateurs</li>
+        <li class="role-perm"><span class="perm-check">✓</span> Stats personnelles</li>
+        <li class="role-perm"><span class="perm-check">✓</span> Recevoir emails</li>
+      </ul>
+    </div>
+
+    <div class="role-card">
+      <div class="role-icon-wrap role-user" style="font-size:1.6rem">👤</div>
+      <div class="role-name">Utilisateur</div>
+      <div class="role-subtitle">Consultation de ses tickets</div>
+      <ul class="role-perms">
+        <li class="role-perm"><span class="perm-check">✓</span> Voir ses propres tickets</li>
+        <li class="role-perm"><span class="perm-check">✓</span> Créer des tickets</li>
+        <li class="role-perm"><span class="perm-cross">✗</span> Modifier les tickets</li>
+        <li class="role-perm"><span class="perm-cross">✗</span> Supprimer les tickets</li>
+        <li class="role-perm"><span class="perm-cross">✗</span> Gérer les utilisateurs</li>
+        <li class="role-perm"><span class="perm-check">✓</span> Stats personnelles</li>
+        <li class="role-perm"><span class="perm-check">✓</span> Recevoir emails</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- STACK -->
+<section class="section" id="stack">
+  <div class="reveal">
+    <div class="section-label">Technologies</div>
+    <h2 class="section-title">Stack technique moderne<br>et robuste</h2>
+    <p class="section-subtitle">Construit avec des technologies professionnelles éprouvées en environnement de production.</p>
+  </div>
+
+  <div class="stack-grid reveal">
+    <div class="stack-item">
+      <div class="stack-logo" style="color:var(--accent);">Dj</div>
+      <div>
+        <div class="stack-name">Django 6.0.4</div>
+        <div class="stack-type">Backend Framework</div>
+      </div>
+    </div>
+    <div class="stack-item">
+      <div class="stack-logo" style="color:#336791;">Pg</div>
+      <div>
+        <div class="stack-name">PostgreSQL</div>
+        <div class="stack-type">Base de données</div>
+      </div>
+    </div>
+    <div class="stack-item">
+      <div class="stack-logo" style="color:#7952b3;">Bs</div>
+      <div>
+        <div class="stack-name">Bootstrap 5</div>
+        <div class="stack-type">Frontend CSS</div>
+      </div>
+    </div>
+    <div class="stack-item">
+      <div class="stack-logo" style="color:#e74c3c;">Ce</div>
+      <div>
+        <div class="stack-name">Celery + Redis</div>
+        <div class="stack-type">Tâches async</div>
+      </div>
+    </div>
+    <div class="stack-item">
+      <div class="stack-logo" style="color:#a7c231;">Drf</div>
+      <div>
+        <div class="stack-name">Django REST</div>
+        <div class="stack-type">API Framework</div>
+      </div>
+    </div>
+    <div class="stack-item">
+      <div class="stack-logo" style="color:var(--green-light);">Gu</div>
+      <div>
+        <div class="stack-name">Gunicorn</div>
+        <div class="stack-type">Serveur WSGI</div>
+      </div>
+    </div>
+    <div class="stack-item">
+      <div class="stack-logo" style="color:#009639;">Nx</div>
+      <div>
+        <div class="stack-name">Nginx</div>
+        <div class="stack-type">Reverse Proxy</div>
+      </div>
+    </div>
+    <div class="stack-item">
+      <div class="stack-logo" style="color:#e8462e;">Al</div>
+      <div>
+        <div class="stack-name">AlmaLinux</div>
+        <div class="stack-type">Système d'exploitation</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="cta-content reveal">
+    <div class="section-label">Accès</div>
+    <h2 class="cta-title">Prêt à gérer vos tickets ?</h2>
+    <p class="cta-desc">L'application est déployée et accessible. Connectez-vous avec votre compte.</p>
+    <div style="display:flex; gap:1rem; justify-content:center; flex-wrap:wrap;">
+      <a href="http://192.168.74.128" class="btn-primary" style="font-size:1rem; padding:1rem 2.5rem;">
+        Accéder à l'application →
+      </a>
+      <a href="https://github.com/MeryemElmoubarhine/gestion_ticket" class="btn-secondary" style="font-size:1rem; padding:1rem 2.5rem;">
+        GitHub
+      </a>
+    </div>
+    <div style="margin-top:2.5rem; display:flex; gap:2rem; justify-content:center; flex-wrap:wrap;">
+      <div style="text-align:center;">
+        <div style="font-size:0.75rem; color:rgba(255,255,255,0.3); letter-spacing:1px; margin-bottom:4px;">ADMIN</div>
+        <div style="font-family:'Syne',sans-serif; font-size:0.9rem; color:var(--accent); font-weight:600;">meryem / votre mdp</div>
+      </div>
+      <div style="width:1px; background:rgba(255,255,255,0.1);"></div>
+      <div style="text-align:center;">
+        <div style="font-size:0.75rem; color:rgba(255,255,255,0.3); letter-spacing:1px; margin-bottom:4px;">TECHNICIEN</div>
+        <div style="font-family:'Syne',sans-serif; font-size:0.9rem; color:#60a5fa; font-weight:600;">technicien1 / tech1234</div>
+      </div>
+      <div style="width:1px; background:rgba(255,255,255,0.1);"></div>
+      <div style="text-align:center;">
+        <div style="font-size:0.75rem; color:rgba(255,255,255,0.3); letter-spacing:1px; margin-bottom:4px;">UTILISATEUR</div>
+        <div style="font-family:'Syne',sans-serif; font-size:0.9rem; color:#fbbf24; font-weight:600;">utilisateur1 / user1234</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-left">
+    © 2026 Meryem Elmoubarhine — Stage PFE · EXPERTS ITN MAROC · Technopark Casablanca
+  </div>
+  <div class="footer-right">
+    <a href="{% url 'api_stats' %}" class="footer-link">API Stats</a>
+    <a href="/admin/" class="footer-link">Admin Django</a>
+    <a href="https://github.com/MeryemElmoubarhine/gestion_ticket" class="footer-link">GitHub</a>
+  </div>
+</footer>
+
+<script>
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      observer.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    const target = document.querySelector(a.getAttribute('href'));
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+});
+</script>
+</body>
+</html>

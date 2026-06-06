@@ -140,3 +140,13 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'elmoubarhinemrym@gmail.com'
 EMAIL_HOST_PASSWORD = 'ylwzidjzvahxdxjo'
 DEFAULT_FROM_EMAIL = 'elmoubarhinemrym@gmail.com'
+
+# Configuration Nginx proxy
+CSRF_TRUSTED_ORIGINS = ['http://192.168.74.128']
+USE_X_FORWARDED_HOST = True
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'http')
+
+CSRF_COOKIE_SECURE = False
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SAMESITE = 'Lax'

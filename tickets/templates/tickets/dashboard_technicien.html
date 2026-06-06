@@ -1,148 +1,239 @@
 {% extends 'tickets/base.html' %}
-{% block title %}Dashboard Technicien – EXPERTS ITN{% endblock %}
+{% block title %}Dashboard Technicien - EXPERTS ITN{% endblock %}
 {% block content %}
-<nav class="navbar navbar-expand-lg navbar-dark">
-  <div class="container-fluid px-4">
-    <span class="navbar-brand fw-bold"><i class="fas fa-ticket-alt me-2"></i>EXPERTS ITN</span>
-    <div class="ms-auto d-flex align-items-center gap-2">
-      <span class="badge bg-primary">Technicien</span>
-      <span class="text-white"><i class="fas fa-user-circle me-1"></i>{{ request.user.username }}</span>
-      <a href="{% url 'logout' %}" class="btn btn-outline-light btn-sm"><i class="fas fa-sign-out-alt"></i></a>
+
+<nav class="navbar navbar-expand-lg navbar-dark" style="background:#1B4F8A;">
+    <div class="container-fluid px-4">
+        <span class="navbar-brand fw-bold">
+            <i class="fas fa-ticket-alt me-2"></i>EXPERTS ITN
+        </span>
+        <div class="ms-auto d-flex align-items-center gap-2">
+            <span class="badge bg-primary">Technicien</span>
+            <span class="text-white">
+                <i class="fas fa-user-circle me-1"></i>{{ request.user.username }}
+            </span>
+            <a href="{% url 'logout' %}" class="btn btn-outline-light btn-sm">
+                <i class="fas fa-sign-out-alt"></i>
+            </a>
+        </div>
     </div>
-  </div>
 </nav>
 
 <div class="container-fluid px-4 py-4">
-  <h4 class="fw-bold mb-4">
-    <i class="fas fa-tools me-2 text-primary"></i>
-    Bonjour {{ request.user.first_name|default:request.user.username }} 👋
-    <small class="text-muted fs-6">— Vos tickets assignés</small>
-  </h4>
 
-  <!-- STATS -->
-  <div class="row g-3 mb-4">
-    <div class="col-md-3">
-      <div class="card text-white text-center" style="background:linear-gradient(135deg,#1B4F8A,#2E5FA3);">
-        <div class="card-body py-3">
-          <div class="fs-2 fw-bold">{{ total }}</div>
-          <div class="small"><i class="fas fa-ticket-alt me-1"></i>Mes tickets</div>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-3">
-      <div class="card text-white text-center" style="background:linear-gradient(135deg,#e67e22,#f39c12);">
-        <div class="card-body py-3">
-          <div class="fs-2 fw-bold">{{ ouverts }}</div>
-          <div class="small"><i class="fas fa-folder-open me-1"></i>À traiter</div>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-3">
-      <div class="card text-white text-center" style="background:linear-gradient(135deg,#2980b9,#3498db);">
-        <div class="card-body py-3">
-          <div class="fs-2 fw-bold">{{ en_cours }}</div>
-          <div class="small"><i class="fas fa-spinner me-1"></i>En cours</div>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-3">
-      <div class="card text-white text-center" style="background:linear-gradient(135deg,#c0392b,#e74c3c);">
-        <div class="card-body py-3">
-          <div class="fs-2 fw-bold">{{ haute }}</div>
-          <div class="small"><i class="fas fa-exclamation-triangle me-1"></i>Urgents</div>
-        </div>
-      </div>
-    </div>
-  </div>
+    <h4 class="fw-bold mb-4">
+        <i class="fas fa-tools me-2 text-primary"></i>
+        Bonjour {{ request.user.first_name|default:request.user.username }} 👋
+        <small class="text-muted fs-6">— Vos tickets assignés</small>
+    </h4>
 
-  <!-- DERNIERS TICKETS + ACTIONS -->
-  <div class="row g-4">
-    <div class="col-md-8">
-      <div class="card">
-        <div class="card-header fw-bold" style="background:#1B4F8A;color:white;">
-          <i class="fas fa-list me-2"></i>Mes derniers tickets
+    <!-- Cartes statistiques -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="card text-white shadow" style="background:#1B4F8A;">
+                <div class="card-body text-center py-3">
+                    <h2 class="fw-bold mb-1">{{ total }}</h2>
+                    <p class="mb-0 small"><i class="fas fa-ticket-alt me-1"></i>Mes tickets</p>
+                </div>
+            </div>
         </div>
-        <div class="card-body p-0">
-          <table class="table table-hover mb-0">
-            <thead style="background:#f8f9fa;">
-              <tr>
-                <th class="px-3">#</th>
-                <th>Titre</th>
-                <th>Statut</th>
-                <th>Priorité</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for ticket in derniers_tickets %}
-              <tr>
-                <td class="px-3">{{ ticket.id }}</td>
-                <td>{{ ticket.titre }}</td>
-                <td>
-                  {% if ticket.statut == 'OUVERT' %}<span class="badge bg-warning text-dark">Ouvert</span>
-                  {% elif ticket.statut == 'EN_COURS' %}<span class="badge bg-primary">En cours</span>
-                  {% elif ticket.statut == 'RESOLU' %}<span class="badge bg-success">Résolu</span>
-                  {% elif ticket.statut == 'FERME' %}<span class="badge bg-secondary">Fermé</span>{% endif %}
-                </td>
-                <td>
-                  {% if ticket.priorite == 'HAUTE' %}<span class="badge bg-danger">Haute</span>
-                  {% elif ticket.priorite == 'MOYENNE' %}<span class="badge bg-warning text-dark">Moyenne</span>
-                  {% elif ticket.priorite == 'BASSE' %}<span class="badge bg-success">Basse</span>{% endif %}
-                </td>
-                <td>
-                  <a href="{% url 'detail_ticket' ticket.pk %}" class="btn btn-sm btn-outline-primary"><i class="fas fa-eye"></i></a>
-                  <a href="{% url 'modifier_ticket' ticket.pk %}" class="btn btn-sm btn-outline-warning"><i class="fas fa-edit"></i></a>
-                </td>
-              </tr>
-              {% empty %}
-              <tr><td colspan="5" class="text-center py-4 text-muted">Aucun ticket assigné</td></tr>
-              {% endfor %}
-            </tbody>
-          </table>
+        <div class="col-6 col-md-3">
+            <div class="card text-white shadow" style="background:#f59e0b;">
+                <div class="card-body text-center py-3">
+                    <h2 class="fw-bold mb-1">{{ a_traiter }}</h2>
+                    <p class="mb-0 small"><i class="fas fa-folder-open me-1"></i>À traiter</p>
+                </div>
+            </div>
         </div>
-        <div class="card-footer">
-          <a href="{% url 'liste_tickets' %}" class="btn btn-outline-primary btn-sm">
-            <i class="fas fa-list me-1"></i>Voir tous mes tickets
-          </a>
+        <div class="col-6 col-md-3">
+            <div class="card text-white shadow" style="background:#3b82f6;">
+                <div class="card-body text-center py-3">
+                    <h2 class="fw-bold mb-1">{{ en_cours }}</h2>
+                    <p class="mb-0 small"><i class="fas fa-spinner me-1"></i>En cours</p>
+                </div>
+            </div>
         </div>
-      </div>
+        <div class="col-6 col-md-3">
+            <div class="card text-white shadow" style="background:#ef4444;">
+                <div class="card-body text-center py-3">
+                    <h2 class="fw-bold mb-1">{{ urgents }}</h2>
+                    <p class="mb-0 small"><i class="fas fa-exclamation-triangle me-1"></i>Urgents</p>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="col-md-4">
-      <div class="card">
-        <div class="card-header fw-bold" style="background:#1B4F8A;color:white;">
-          <i class="fas fa-bolt me-2"></i>Actions
+
+    <!-- Contenu principal -->
+    <div class="row g-4">
+
+        <!-- Tableau des tickets -->
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header fw-bold text-white" style="background:#1B4F8A;">
+                    <i class="fas fa-list me-2"></i>Mes derniers tickets
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-hover mb-0">
+                        <thead style="background:#f8f9fa;">
+                            <tr>
+                                <th class="px-3">#</th>
+                                <th>Titre</th>
+                                <th>Statut</th>
+                                <th>Priorité</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ticket in derniers_tickets %}
+                            <tr>
+                                <td class="px-3">{{ ticket.id }}</td>
+                                <td>{{ ticket.titre }}</td>
+                                <td>
+                                    {% if ticket.statut == 'OUVERT' %}
+                                        <span class="badge bg-warning text-dark">Ouvert</span>
+                                    {% elif ticket.statut == 'EN_COURS' %}
+                                        <span class="badge bg-primary">En cours</span>
+                                    {% elif ticket.statut == 'RESOLU' %}
+                                        <span class="badge bg-success">Résolu</span>
+                                    {% elif ticket.statut == 'FERME' %}
+                                        <span class="badge bg-secondary">Fermé</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if ticket.priorite == 'HAUTE' %}
+                                        <span class="badge bg-danger">Haute</span>
+                                    {% elif ticket.priorite == 'MOYENNE' %}
+                                        <span class="badge bg-warning text-dark">Moyenne</span>
+                                    {% elif ticket.priorite == 'BASSE' %}
+                                        <span class="badge bg-success">Basse</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{% url 'detail_ticket' ticket.pk %}" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{% url 'modifier_ticket' ticket.pk %}" class="btn btn-sm btn-outline-warning">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center py-4 text-muted">
+                                    Aucun ticket assigné
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="card-footer">
+                    <a href="{% url 'liste_tickets' %}" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-list me-1"></i>Voir tous mes tickets
+                    </a>
+                </div>
+            </div>
         </div>
-        <div class="card-body d-grid gap-2">
-          <a href="{% url 'liste_tickets' %}" class="btn btn-primary">
-            <i class="fas fa-list me-2"></i>Mes tickets
-          </a>
-          <a href="{% url 'creer_ticket' %}" class="btn btn-success">
-            <i class="fas fa-plus me-2"></i>Créer un ticket
-          </a>
+
+        <!-- Colonne droite -->
+        <div class="col-md-4">
+
+            <!-- Actions -->
+            <div class="card shadow">
+                <div class="card-header fw-bold text-white" style="background:#1B4F8A;">
+                    <i class="fas fa-bolt me-2"></i>Actions
+                </div>
+                <div class="card-body d-grid gap-2">
+                    <a href="{% url 'liste_tickets' %}" class="btn btn-primary">
+                        <i class="fas fa-list me-2"></i>Mes tickets
+                    </a>
+                    <a href="{% url 'creer_ticket' %}" class="btn btn-success">
+                        <i class="fas fa-plus me-2"></i>Créer un ticket
+                    </a>
+                </div>
+            </div>
+
+            <!-- Statistiques -->
+            <div class="card shadow mt-3">
+                <div class="card-header fw-bold text-white" style="background:#27ae60;">
+                    <i class="fas fa-chart-pie me-2"></i>Mes statistiques
+                </div>
+                <div class="card-body text-center">
+                    <canvas id="chartTech" width="220" height="220"></canvas>
+                    <div id="legendTech" class="mt-2"></div>
+                </div>
+            </div>
+
         </div>
-      </div>
-      <div class="card mt-3">
-        <div class="card-header fw-bold" style="background:#27ae60;color:white;">
-          <i class="fas fa-chart-pie me-2"></i>Mes statistiques
-        </div>
-        <div class="card-body">
-          <canvas id="chartTech" style="max-height:200px;"></canvas>
-        </div>
-      </div>
     </div>
-  </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Graphique custom — PAS de Chart.js, canvas natif uniquement -->
 <script>
-new Chart(document.getElementById('chartTech'), {
-  type: 'doughnut',
-  data: {
-    labels: ['Ouvert', 'En cours', 'Résolu', 'Fermé'],
-    datasets: [{ data: [{{ ouverts }}, {{ en_cours }}, {{ resolus }}, {{ fermes }}],
-      backgroundColor: ['#f39c12','#3498db','#2ecc71','#95a5a6'], borderWidth: 2 }]
-  },
-  options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+document.addEventListener('DOMContentLoaded', function () {
+    var c = document.getElementById('chartTech');
+    if (c) {
+        c.width = 220; c.height = 220;
+        var ctx = c.getContext('2d');
+        var vals = [
+            {{ mes_ouverts|default:0 }},
+            {{ mes_en_cours|default:0 }},
+            {{ mes_resolus|default:0 }},
+            {{ mes_fermes|default:0 }}
+        ];
+        var colors = ['#f59e0b', '#3b82f6', '#10b981', '#6b7280'];
+        var labels = ['Ouvert', 'En cours', 'Résolu', 'Fermé'];
+        var total = vals.reduce(function(a,b){return a+b;},0);
+        var cx = 110, cy = 110, r = 90, ri = 55;
+        var start = -Math.PI / 2;
+
+        if (total === 0) {
+            ctx.beginPath();
+            ctx.arc(cx,cy,r,0,2*Math.PI);
+            ctx.fillStyle='#e5e7eb'; ctx.fill();
+            ctx.beginPath();
+            ctx.arc(cx,cy,ri,0,2*Math.PI);
+            ctx.fillStyle='#fff'; ctx.fill();
+            ctx.fillStyle='#9ca3af';
+            ctx.font='13px Arial';
+            ctx.textAlign='center';
+            ctx.fillText('Aucun ticket',cx,cy+5);
+        } else {
+            vals.forEach(function(v,i){
+                if (v === 0) return;
+                var angle = (v/total)*2*Math.PI;
+                ctx.beginPath();
+                ctx.moveTo(cx,cy);
+                ctx.arc(cx,cy,r,start,start+angle);
+                ctx.closePath();
+                ctx.fillStyle=colors[i]; ctx.fill();
+                ctx.strokeStyle='#fff'; ctx.lineWidth=3; ctx.stroke();
+                start+=angle;
+            });
+            ctx.beginPath();
+            ctx.arc(cx,cy,ri,0,2*Math.PI);
+            ctx.fillStyle='#fff'; ctx.fill();
+            ctx.fillStyle='#1f2937';
+            ctx.font='bold 28px Arial';
+            ctx.textAlign='center';
+            ctx.fillText(total,cx,cy+5);
+            ctx.font='12px Arial';
+            ctx.fillStyle='#6b7280';
+            ctx.fillText('tickets',cx,cy+22);
+        }
+
+        // Légende
+        var legend = document.createElement('div');
+        legend.style.cssText='display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin-top:10px;';
+        labels.forEach(function(l,i){
+            if (vals[i]===0) return;
+            var item=document.createElement('div');
+            item.style.cssText='display:flex;align-items:center;gap:4px;font-size:12px;color:#374151;';
+            item.innerHTML='<span style="width:10px;height:10px;border-radius:50%;background:'+colors[i]+';display:inline-block;"></span>'+l+' ('+vals[i]+')';
+            legend.appendChild(item);
+        });
+        c.parentNode.appendChild(legend);
+    }
 });
 </script>
 {% endblock %}

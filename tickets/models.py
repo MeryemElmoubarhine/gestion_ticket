@@ -29,7 +29,7 @@ class Ticket(models.Model):
     statut = models.CharField(max_length=20, choices=STATUT_CHOICES, default='OUVERT')
     priorite = models.CharField(max_length=10, choices=PRIORITE_CHOICES, default='MOYENNE')
     date_creation = models.DateTimeField(auto_now_add=True)
-    client = models.ForeignKey(Client, on_delete=models.CASCADE, null=True, blank=True)
+    client = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='tickets_client')
     technicien = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
