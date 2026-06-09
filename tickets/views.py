@@ -1,11 +1,26 @@
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from .serializers import TicketSerializer
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 from .models import Ticket, Historique, Profil
 from .forms import TicketForm
 from django.contrib.auth.models import User
-from .tasks import envoyer_email_nouveau_ticket, notifier_technicien
+import json
+
+try:
+    from .tasks import envoyer_email_nouveau_ticket, notifier_technicien
+except ImportError:
+    envoyer_email_nouveau_ticket = None
+    notifier_technicien = None
+
+
+# ─── UTILITAIRE RÔLE ────────────────────────────────────────────────────────
 
 def get_role(user):
     try:
@@ -13,12 +28,15 @@ def get_role(user):
     except:
         return 'utilisateur'
 
+
+# ─── AUTHENTIFICATION ────────────────────────────────────────────────────────
+
 def login_view(request):
     if request.user.is_authenticated:
         return redirect('dashboard')
     if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
+        username = request.POST.get('username', '')
+        password = request.POST.get('password', '')
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
@@ -27,14 +45,17 @@ def login_view(request):
             messages.error(request, "Nom d'utilisateur ou mot de passe incorrect.")
     return render(request, 'tickets/login.html')
 
+
 def logout_view(request):
     logout(request)
     return redirect('login')
 
+
+# ─── DASHBOARD ───────────────────────────────────────────────────────────────
+
 @login_required(login_url='login')
 def dashboard(request):
     role = get_role(request.user)
-
     if role == 'admin' or request.user.is_superuser:
         return redirect('dashboard_admin')
     elif role == 'technicien':
@@ -42,9 +63,13 @@ def dashboard(request):
     else:
         return redirect('dashboard_utilisateur')
 
-# ── DASHBOARD ADMIN ──────────────────────────────────────
+
 @login_required(login_url='login')
 def dashboard_admin(request):
+    role = get_role(request.user)
+    if role != 'admin' and not request.user.is_superuser:
+        return redirect('dashboard')
+
     tickets = Ticket.objects.all()
     total = tickets.count()
     ouverts = tickets.filter(statut='OUVERT').count()
@@ -72,9 +97,13 @@ def dashboard_admin(request):
         'derniers_tickets': derniers_tickets,
     })
 
-# ── DASHBOARD TECHNICIEN ────────────────────────────────
+
 @login_required(login_url='login')
 def dashboard_technicien(request):
+    role = get_role(request.user)
+    if role != 'technicien':
+        return redirect('dashboard')
+
     tickets = Ticket.objects.filter(technicien=request.user)
     mes_ouverts = tickets.filter(statut='OUVERT').count()
     mes_en_cours = tickets.filter(statut='EN_COURS').count()
@@ -95,13 +124,18 @@ def dashboard_technicien(request):
         'derniers_tickets': derniers_tickets,
     })
 
-# ── DASHBOARD UTILISATEUR ────────────────────────────────
+
 @login_required(login_url='login')
 def dashboard_utilisateur(request):
+    role = get_role(request.user)
+    if role != 'utilisateur':
+        return redirect('dashboard')
+
     derniers_tickets = Ticket.objects.filter(client=request.user).order_by('-date_creation')
     total = derniers_tickets.count()
     ouverts = derniers_tickets.filter(statut='OUVERT').count()
     resolus = derniers_tickets.filter(statut='RESOLU').count()
+
     return render(request, 'tickets/dashboard_utilisateur.html', {
         'derniers_tickets': derniers_tickets,
         'total': total,
@@ -109,31 +143,9 @@ def dashboard_utilisateur(request):
         'resolus': resolus,
     })
 
-# ── GESTION UTILISATEURS (admin seulement) ───────────────
-@login_required(login_url='login')
-def gestion_utilisateurs(request):
-    role = get_role(request.user)
-    if role != 'admin' and not request.user.is_superuser:
-        messages.error(request, "Accès refusé.")
-        return redirect('dashboard')
-    users = User.objects.all().select_related('profil')
-    return render(request, 'tickets/gestion_utilisateurs.html', {'users': users})
 
-@login_required(login_url='login')
-def changer_role(request, user_id):
-    role = get_role(request.user)
-    if role != 'admin' and not request.user.is_superuser:
-        return redirect('dashboard')
-    if request.method == 'POST':
-        user = get_object_or_404(User, pk=user_id)
-        nouveau_role = request.POST.get('role')
-        profil, _ = Profil.objects.get_or_create(utilisateur=user)
-        profil.role = nouveau_role
-        profil.save()
-        messages.success(request, f"Rôle de {user.username} changé en {nouveau_role}")
-    return redirect('gestion_utilisateurs')
+# ─── TICKETS ─────────────────────────────────────────────────────────────────
 
-# ── TICKETS ──────────────────────────────────────────────
 @login_required(login_url='login')
 def liste_tickets(request):
     role = get_role(request.user)
@@ -145,6 +157,7 @@ def liste_tickets(request):
         tickets = Ticket.objects.all().order_by('-date_creation')
     return render(request, 'tickets/liste.html', {'tickets': tickets, 'role': role})
 
+
 @login_required(login_url='login')
 def creer_ticket(request):
     form = TicketForm()
@@ -152,12 +165,19 @@ def creer_ticket(request):
         form = TicketForm(request.POST)
         if form.is_valid():
             ticket = form.save()
-            Historique.objects.create(ticket=ticket, utilisateur=request.user, action="Ticket créé")
-            envoyer_email_nouveau_ticket.delay(ticket.id)
-            notifier_technicien.delay(ticket.id)
+            Historique.objects.create(
+                ticket=ticket,
+                utilisateur=request.user,
+                action="Ticket créé"
+            )
+            if envoyer_email_nouveau_ticket:
+                envoyer_email_nouveau_ticket.delay(ticket.id)
+            if notifier_technicien:
+                notifier_technicien.delay(ticket.id)
             messages.success(request, "Ticket créé avec succès !")
             return redirect('liste_tickets')
     return render(request, 'tickets/creer_ticket.html', {'form': form})
+
 
 @login_required(login_url='login')
 def detail_ticket(request, pk):
@@ -165,8 +185,11 @@ def detail_ticket(request, pk):
     historique = Historique.objects.filter(ticket=ticket).order_by('-date_action')
     role = get_role(request.user)
     return render(request, 'tickets/detail_ticket.html', {
-        'ticket': ticket, 'historique': historique, 'role': role,
+        'ticket': ticket,
+        'historique': historique,
+        'role': role,
     })
+
 
 @login_required(login_url='login')
 def modifier_ticket(request, pk):
@@ -180,86 +203,177 @@ def modifier_ticket(request, pk):
         form = TicketForm(request.POST, instance=ticket)
         if form.is_valid():
             form.save()
-            Historique.objects.create(ticket=ticket, utilisateur=request.user, action=f"Ticket modifié par {request.user.username}")
+            Historique.objects.create(
+                ticket=ticket,
+                utilisateur=request.user,
+                action=f"Ticket modifié par {request.user.username}"
+            )
             messages.success(request, "Ticket modifié avec succès !")
             return redirect('liste_tickets')
     return render(request, 'tickets/modifier_ticket.html', {'form': form, 'ticket': ticket})
+
 
 @login_required(login_url='login')
 def supprimer_ticket(request, pk):
     ticket = get_object_or_404(Ticket, pk=pk)
     role = get_role(request.user)
     if role != 'admin' and not request.user.is_superuser:
-        messages.error(request, "Seul un admin peut supprimer.")
+        messages.error(request, "Seul un administrateur peut supprimer un ticket.")
         return redirect('liste_tickets')
     if request.method == 'POST':
         ticket.delete()
-        messages.success(request, "Ticket supprimé.")
+        messages.success(request, "Ticket supprimé avec succès.")
         return redirect('liste_tickets')
     return render(request, 'tickets/supprimer_ticket.html', {'ticket': ticket})
 
-# ── API REST ─────────────────────────────────────────────
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
-from rest_framework import status
-from .serializers import TicketSerializer
 
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
+# ─── GESTION UTILISATEURS ────────────────────────────────────────────────────
+
+@login_required(login_url='login')
+def gestion_utilisateurs(request):
+    role = get_role(request.user)
+    if role != 'admin' and not request.user.is_superuser:
+        messages.error(request, "Accès refusé.")
+        return redirect('dashboard')
+    users = User.objects.all().select_related('profil').order_by('username')
+    return render(request, 'tickets/gestion_utilisateurs.html', {'users': users})
+
+
+@login_required(login_url='login')
+def changer_role(request, user_id):
+    role = get_role(request.user)
+    if role != 'admin' and not request.user.is_superuser:
+        messages.error(request, "Accès refusé.")
+        return redirect('dashboard')
+    if request.method == 'POST':
+        user = get_object_or_404(User, pk=user_id)
+        nouveau_role = request.POST.get('role')
+        if nouveau_role in ['admin', 'technicien', 'utilisateur']:
+            profil, _ = Profil.objects.get_or_create(utilisateur=user)
+            profil.role = nouveau_role
+            profil.save()
+            messages.success(request, f"Rôle de {user.username} changé en {nouveau_role}.")
+        else:
+            messages.error(request, "Rôle invalide.")
+    return redirect('gestion_utilisateurs')
+
+
+# ─── API REST ─────────────────────────────────────────────────────────────────
+
+@login_required(login_url='login')
 def api_tickets_list(request):
     tickets = Ticket.objects.all().order_by('-date_creation')
-    serializer = TicketSerializer(tickets, many=True)
-    return Response(serializer.data)
+    data = []
+    for t in tickets:
+        data.append({
+            'id': t.id,
+            'titre': t.titre,
+            'description': t.description,
+            'statut': t.statut,
+            'priorite': t.priorite,
+            'date_creation': t.date_creation.isoformat(),
+            'client': t.client.username if t.client else None,
+            'technicien': t.technicien.username if t.technicien else None,
+        })
+    return JsonResponse(data, safe=False)
 
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
+
+@login_required(login_url='login')
 def api_ticket_detail(request, pk):
     ticket = get_object_or_404(Ticket, pk=pk)
-    serializer = TicketSerializer(ticket)
-    return Response(serializer.data)
+    historique = list(Historique.objects.filter(ticket=ticket).order_by('-date_action').values(
+        'id', 'action', 'date_action', 'utilisateur__username'
+    ))
+    data = {
+        'id': ticket.id,
+        'titre': ticket.titre,
+        'description': ticket.description,
+        'statut': ticket.statut,
+        'priorite': ticket.priorite,
+        'date_creation': ticket.date_creation.isoformat(),
+        'client': ticket.client.username if ticket.client else None,
+        'technicien': ticket.technicien.username if ticket.technicien else None,
+        'historique': historique,
+    }
+    return JsonResponse(data)
 
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
+
+@csrf_exempt
+@login_required(login_url='login')
 def api_creer_ticket(request):
-    serializer = TicketSerializer(data=request.data)
-    if serializer.is_valid():
-        ticket = serializer.save()
-        Historique.objects.create(ticket=ticket, utilisateur=request.user, action="Ticket créé via API")
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    if request.method == 'POST':
+        try:
+            body = json.loads(request.body)
+            ticket = Ticket.objects.create(
+                titre=body.get('titre', ''),
+                description=body.get('description', ''),
+                statut=body.get('statut', 'OUVERT'),
+                priorite=body.get('priorite', 'MOYENNE'),
+            )
+            Historique.objects.create(
+                ticket=ticket,
+                utilisateur=request.user,
+                action="Ticket créé via API"
+            )
+            return JsonResponse({'id': ticket.id, 'message': 'Ticket créé avec succès'}, status=201)
+        except Exception as e:
+            return JsonResponse({'erreur': str(e)}, status=400)
+    return JsonResponse({'erreur': 'Méthode non autorisée'}, status=405)
 
-@api_view(['PUT'])
-@permission_classes([IsAuthenticated])
+
+@csrf_exempt
+@login_required(login_url='login')
 def api_modifier_ticket(request, pk):
     ticket = get_object_or_404(Ticket, pk=pk)
-    serializer = TicketSerializer(ticket, data=request.data, partial=True)
-    if serializer.is_valid():
-        serializer.save()
-        return Response(serializer.data)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    if request.method == 'PUT':
+        try:
+            body = json.loads(request.body)
+            ticket.titre = body.get('titre', ticket.titre)
+            ticket.description = body.get('description', ticket.description)
+            ticket.statut = body.get('statut', ticket.statut)
+            ticket.priorite = body.get('priorite', ticket.priorite)
+            ticket.save()
+            Historique.objects.create(
+                ticket=ticket,
+                utilisateur=request.user,
+                action=f"Ticket modifié via API par {request.user.username}"
+            )
+            return JsonResponse({'message': 'Ticket modifié avec succès'})
+        except Exception as e:
+            return JsonResponse({'erreur': str(e)}, status=400)
+    return JsonResponse({'erreur': 'Méthode non autorisée'}, status=405)
 
-@api_view(['DELETE'])
-@permission_classes([IsAuthenticated])
+
+@csrf_exempt
+@login_required(login_url='login')
 def api_supprimer_ticket(request, pk):
+    role = get_role(request.user)
+    if role != 'admin' and not request.user.is_superuser:
+        return JsonResponse({'erreur': 'Permission refusée'}, status=403)
     ticket = get_object_or_404(Ticket, pk=pk)
-    ticket.delete()
-    return Response({'message': 'Ticket supprimé'}, status=status.HTTP_204_NO_CONTENT)
+    if request.method == 'DELETE':
+        ticket.delete()
+        return JsonResponse({'message': 'Ticket supprimé avec succès'})
+    return JsonResponse({'erreur': 'Méthode non autorisée'}, status=405)
 
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
+
+@login_required(login_url='login')
 def api_stats(request):
-    return Response({
-        'total': Ticket.objects.count(),
-        'ouverts': Ticket.objects.filter(statut='OUVERT').count(),
-        'en_cours': Ticket.objects.filter(statut='EN_COURS').count(),
-        'resolus': Ticket.objects.filter(statut='RESOLU').count(),
-        'fermes': Ticket.objects.filter(statut='FERME').count(),
-        'haute': Ticket.objects.filter(priorite='HAUTE').count(),
-        'moyenne': Ticket.objects.filter(priorite='MOYENNE').count(),
-        'basse': Ticket.objects.filter(priorite='BASSE').count(),
-    })
+    tickets = Ticket.objects.all()
+    data = {
+        'total': tickets.count(),
+        'ouverts': tickets.filter(statut='OUVERT').count(),
+        'en_cours': tickets.filter(statut='EN_COURS').count(),
+        'resolus': tickets.filter(statut='RESOLU').count(),
+        'fermes': tickets.filter(statut='FERME').count(),
+        'haute': tickets.filter(priorite='HAUTE').count(),
+        'moyenne': tickets.filter(priorite='MOYENNE').count(),
+        'basse': tickets.filter(priorite='BASSE').count(),
+        'nb_techniciens': User.objects.filter(profil__role='technicien').count(),
+        'nb_utilisateurs': User.objects.filter(profil__role='utilisateur').count(),
+    }
+    return JsonResponse(data)
 
-#-----Page d'accueil-------
+
 def accueil(request):
     return render(request, 'tickets/accueil.html')
